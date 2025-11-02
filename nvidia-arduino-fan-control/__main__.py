@@ -79,12 +79,12 @@ while True:
     if fan_active:
         new_flow = max(new_flow, config.gpu_fan_active_threshold_flow)
 
-    print(cur_flow, new_flow, file=sys.stderr)
-
     if new_flow != cur_flow:
         if new_flow < cur_flow and speed_decrease_deadline is None:
+            print(f'Set {new_flow}, prev {cur_flow} after {config.step_down_threshold_seconds} seconds', file=sys.stderr)
             speed_decrease_deadline = start_time + config.step_down_threshold_seconds
-        if new_flow > cur_flow or speed_decrease_deadline > start_time:
+        if new_flow > cur_flow or speed_decrease_deadline <= start_time:
+            print(f'Set {new_flow}, prev {cur_flow}', file=sys.stderr)
             if not controller.set_pwm(new_flow):
                 print('Can not set fan speed...', file=sys.stderr)
             else:
