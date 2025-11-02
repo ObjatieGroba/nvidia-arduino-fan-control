@@ -81,7 +81,7 @@ while True:
 
     if new_flow != cur_flow:
         if new_flow < cur_flow and speed_decrease_deadline is None:
-            print(f'Set {new_flow}, prev {cur_flow} after {config.step_down_threshold_seconds} seconds', file=sys.stderr)
+            print(f'Set {new_flow}, prev {cur_flow}. Hold {config.step_down_threshold_seconds} seconds', file=sys.stderr)
             speed_decrease_deadline = start_time + config.step_down_threshold_seconds
         if new_flow > cur_flow or speed_decrease_deadline <= start_time:
             print(f'Set {new_flow}, prev {cur_flow}', file=sys.stderr)
