@@ -62,7 +62,7 @@ while True:
     fan_active = any(i.fan_speed_perc for i in infos)
 
     next_point_idx = next((i for i in range(len(config.temp_points)) if config.temp_points[i].temp >= max_temp), None)
-    cur_point = config.temp_points[next_point_idx - 1] if next_point_idx else config.temp_points[0]
+    cur_point = config.temp_points[next_point_idx - 1] if next_point_idx else config.temp_points[-1]
     if config.mode == 'stair':
         new_flow = cur_point.flow
     elif config.mode == 'slope':
