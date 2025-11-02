@@ -53,7 +53,7 @@ smi = NvidiaSMI()
 controller = Nano(autoupdate=args.autoupdate)
 
 cur_flow = -1
-last_flow_change_time = time.time()
+speed_decrease_deadline: float | None = None
 
 while True:
     start_time = time.time()
@@ -68,7 +68,7 @@ while True:
     elif config.mode == 'slope':
         if cur_point.temp >= max_temp:
             new_flow = cur_point.flow
-        elif next_point_idx != len(config.temp_points):
+        elif next_point_idx is not None:
             next_point = config.temp_points[next_point_idx]
             new_flow = cur_point.flow + int((max_temp - cur_point.temp) * (next_point.flow - cur_point.flow) / (next_point.temp - cur_point.temp))
         else:
@@ -82,12 +82,17 @@ while True:
     print(cur_flow, new_flow, file=sys.stderr)
 
     if new_flow != cur_flow:
-        if new_flow > cur_flow or start_time - last_flow_change_time > config.step_down_threshold_seconds:
+        if new_flow < cur_flow and speed_decrease_deadline is None:
+            speed_decrease_deadline = start_time + config.step_down_threshold_seconds
+        if new_flow > cur_flow or speed_decrease_deadline > start_time:
             if not controller.set_pwm(new_flow):
-                print('Can not set pwn speed...', file=sys.stderr)
+                print('Can not set fan speed...', file=sys.stderr)
             else:
                 cur_flow = new_flow
                 last_flow_change_time = start_time
+                speed_decrease_deadline = None
+    else:
+        speed_decrease_deadline = None
 
     elapsed_time = time.time() - start_time
     if elapsed_time > config.update_interval_seconds:

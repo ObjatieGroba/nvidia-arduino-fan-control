@@ -13,7 +13,7 @@
       "flow": 60
     }
   ],
-  "gpu_fan_active_threshold_flow": 30,
+  "gpu_fan_active_threshold_flow": 20,
   "step_down_threshold_seconds": 10,
   "mode": "slope",
   "update_interval_seconds": 1
