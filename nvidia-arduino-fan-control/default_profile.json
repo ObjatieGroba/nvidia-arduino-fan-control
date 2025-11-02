@@ -6,14 +6,14 @@
     },
     {
       "temp": 60,
-      "flow": 40
+      "flow": 30
     },
     {
       "temp": 80,
-      "flow": 80
+      "flow": 60
     }
   ],
-  "gpu_fan_active_threshold_flow": 40,
+  "gpu_fan_active_threshold_flow": 30,
   "step_down_threshold_seconds": 10,
   "mode": "slope",
   "update_interval_seconds": 1

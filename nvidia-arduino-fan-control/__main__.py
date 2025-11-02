@@ -62,15 +62,17 @@ while True:
     fan_active = any(i.fan_speed_perc for i in infos)
 
     next_point_idx = next((i for i in range(len(config.temp_points)) if config.temp_points[i].temp >= max_temp), None)
-    next_point = config.temp_points[next_point_idx]
     cur_point = config.temp_points[next_point_idx - 1] if next_point_idx else config.temp_points[0]
     if config.mode == 'stair':
         new_flow = cur_point.flow
     elif config.mode == 'slope':
         if cur_point.temp >= max_temp:
             new_flow = cur_point.flow
+        elif next_point_idx != len(config.temp_points):
+            next_point = config.temp_points[next_point_idx]
+            new_flow = cur_point.flow + int((max_temp - cur_point.temp) * (next_point.flow - cur_point.flow) / (next_point.temp - cur_point.temp))
         else:
-            new_flow = cur_point.flow + (max_temp - cur_point.temp) * (next_point.flow - cur_point.flow) / (next_point.temp - cur_point.temp)
+            new_flow = config.temp_points[-1].flow
     else:
         raise NotImplementedError()
 
