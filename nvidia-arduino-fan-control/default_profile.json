@@ -1,0 +1,20 @@
+{
+  "temp_points": [
+    {
+      "temp": 50,
+      "flow": 5
+    },
+    {
+      "temp": 60,
+      "flow": 40
+    },
+    {
+      "temp": 80,
+      "flow": 80
+    }
+  ],
+  "gpu_fan_active_threshold_flow": 40,
+  "step_down_threshold_seconds": 10,
+  "mode": "slope",
+  "update_interval_seconds": 1
+}
