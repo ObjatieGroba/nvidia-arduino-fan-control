@@ -19,7 +19,7 @@ class NvidiaSMI:
         r = subprocess.run([self.executable, '--query-gpu=name,temperature.gpu,fan.speed', '--format=csv,noheader,nounits'],
                            capture_output=True, encoding='utf-8')
 
-        def process(line):
+        def process(line: str) -> tuple[str, int, int]:
             name, temp, speed = line.split(', ')
             return name, int(temp), int(speed)
 

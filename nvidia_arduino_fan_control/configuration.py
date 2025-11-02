@@ -23,7 +23,7 @@ class Configuration(JSONWizard):
     update_interval_seconds: float
     mode: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.mode not in ALLOWED_MODES:
             raise ValueError(f'Unsupported mode: {self.mode}. Allowed modes are {ALLOWED_MODES}')
         for i in range(len(self.temp_points) - 1):

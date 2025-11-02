@@ -31,7 +31,7 @@ class Nano:
         self._init_serial()
         self._check_update_firmware_version(autoupdate)
 
-    def _check_update_firmware_version(self, autoupdate: bool = True, req: int = 3):
+    def _check_update_firmware_version(self, autoupdate: bool = True, req: int = 3) -> None:
         print('Checking firmware version...', file=sys.stderr)
         if req == 0:
             raise ValueError('No firmware version detected. Can not update firmware.')
