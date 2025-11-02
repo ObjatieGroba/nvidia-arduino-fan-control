@@ -44,8 +44,9 @@ class Nano:
             pass
         if not autoupdate:
             raise RuntimeError('Can not check firmware version.')
-        self.serial.close()
-        self.serial = None
+        if self.serial is not None:
+            self.serial.close()
+            self.serial = None
         self.upload_firmware()
         self._init_serial()
         self._check_update_firmware_version(autoupdate, req - 1)
@@ -57,19 +58,25 @@ class Nano:
     def set_pwm(self, flow: int) -> bool:
         if flow < 0 or flow > MAX_FLOW:
             raise ValueError(f'Signal must be between 0 and {MAX_FLOW}')
+        if self.serial is None:
+            self._init_serial()
+            assert self.serial is not None
         print(f'Setting PWM {flow}/{MAX_FLOW}...', file=sys.stderr)
         self.serial.write(chr(ord(FLOW_CHAR_START) + flow).encode())
         err = self.serial.readline().strip()
         return err == b'0'
 
     def get_firmware_version(self) -> list[int]:
+        if self.serial is None:
+            self._init_serial()
+            assert self.serial is not None
         print('Getting firmware version...', file=sys.stderr)
         assert self.serial.write(CHAR_VERSION.encode()) == len(CHAR_VERSION.encode())
         version = self.serial.readline()
-        print(f'Got version: {version}', file=sys.stderr)
+        print(f'Got version: {version!r}', file=sys.stderr)
         return [int(v) for v in version.decode().strip().split('.', maxsplit=1)]
 
-    def upload_firmware(self, path: str = FIRMWARE_PATH) -> None:
+    def upload_firmware(self, path: str | Path = FIRMWARE_PATH) -> None:
         r = subprocess.run(['arduino', '--upload', path, '--port', self.port], capture_output=True, encoding='utf-8')
         if r.returncode != 0:
             print(r.stdout, file=sys.stderr)
