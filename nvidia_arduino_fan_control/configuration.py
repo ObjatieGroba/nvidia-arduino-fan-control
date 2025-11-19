@@ -18,7 +18,8 @@ class TempPoint(JSONWizard):
 @dataclasses.dataclass
 class Configuration(JSONWizard):
     temp_points: list[TempPoint]
-    gpu_fan_active_threshold_flow: int
+    gpu_active_threshold_flow: int
+    gpu_power_threshold_w: int
     step_down_threshold_seconds: float
     update_interval_seconds: float
     mode: str
@@ -34,12 +35,13 @@ class Configuration(JSONWizard):
         for point in self.temp_points:
             if point.flow > MAX_FLOW:
                 raise ValueError(f'Flow should not be greater than {MAX_FLOW} - {point.flow}')
-        if self.gpu_fan_active_threshold_flow > MAX_FLOW:
-            raise ValueError(f'Flow should not be greater than {MAX_FLOW} - {self.gpu_fan_active_threshold_flow}')
+        if self.gpu_active_threshold_flow > MAX_FLOW:
+            raise ValueError(f'Flow should not be greater than {MAX_FLOW} - {self.gpu_active_threshold_flow}')
 
     def get_flow(self, info: list[GpuInfo]) -> int:
         max_temp = max(i.temp for i in info)
         fan_active = any(i.fan_speed_perc for i in info)
+        power_consume_active = any(i.cur_power_w > self.gpu_power_threshold_w for i in info)
 
         next_point_idx = next((i for i in range(len(self.temp_points)) if self.temp_points[i].temp > max_temp), len(self.temp_points))
         cur_point = self.temp_points[next_point_idx - 1] if next_point_idx > 0 else self.temp_points[0]
@@ -56,8 +58,8 @@ class Configuration(JSONWizard):
         else:
             raise NotImplementedError()
 
-        if fan_active:
-            new_flow = max(new_flow, self.gpu_fan_active_threshold_flow)
+        if fan_active or power_consume_active:
+            new_flow = max(new_flow, self.gpu_active_threshold_flow)
 
         return new_flow
 
