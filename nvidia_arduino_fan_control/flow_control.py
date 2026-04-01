@@ -13,6 +13,7 @@ class SensorInfo:
     sensor: Sensor
     last_value: int = 0
     last_printed_value: int = 0
+    suppressed: bool = False
 
 
 @dataclass
@@ -33,9 +34,11 @@ class FlowController:
                 raise ValueError(f'Sensor {sensor.name} duplicated')
 
             if isinstance(sensor, HWMonSensorDescr):
-                self.sensors[sensor.name] = SensorInfo(HWMonSensor.get_by_label(sensor.hwmon, sensor.label or sensor.name))
+                self.sensors[sensor.name] = SensorInfo(HWMonSensor.get_by_label(sensor.hwmon, sensor.label or sensor.name),
+                                                       suppressed=sensor.suppress)
             elif isinstance(sensor, NvidiaSensorDescr):
-                self.sensors[sensor.name] = SensorInfo(NvidiaSensor(sensor.sensor, sensor.filter))
+                self.sensors[sensor.name] = SensorInfo(NvidiaSensor(sensor.sensor, sensor.filter),
+                                                       suppressed=sensor.suppress)
             else:
                 raise ValueError(f'Sensor {sensor.name} ({sensor.type}) is not supported')
 
@@ -61,7 +64,7 @@ class FlowController:
         for name, sensor in self.sensors.items():
             try:
                 sensor.last_value = sensor.sensor.get(start_time)
-                if abs(sensor.last_value - sensor.last_printed_value) > 5:
+                if not sensor.suppressed and abs(sensor.last_value - sensor.last_printed_value) > 5:
                     print(f'Sensor {name}: {sensor.last_value}', file=sys.stderr)
                     sensor.last_printed_value = sensor.last_value
             except Exception as e:

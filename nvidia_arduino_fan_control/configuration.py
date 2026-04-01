@@ -10,6 +10,7 @@ class TempPoint(BaseModel):
 class SensorDescrBase(BaseModel):
     name: str
     type: tp.Literal['hwmon', 'nvidia']
+    suppress: bool = False
 
 
 class HWMonSensorDescr(SensorDescrBase):

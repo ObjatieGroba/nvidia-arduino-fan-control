@@ -9,6 +9,7 @@ sensors:
     type: nvidia
     filter: "4090"
     sensor: power
+    suppress: true
   - name: CPU
     type: hwmon
     hwmon: hwmon4
