@@ -53,7 +53,7 @@ controllers:
         flow: 75
       - temp: 50
         flow: 100
-  - sensor: rtx4090w
+  - sensor: rtx4090wats
     fan: GPU Front
     points:
       - temp: 100

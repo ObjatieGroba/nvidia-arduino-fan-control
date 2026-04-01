@@ -20,7 +20,7 @@ class HWMonSensor(Sensor):
 
     def get(self, _: float) -> int:
         with open(f'{self.path}/{self.type}{self.idx}_input') as f:
-            return int(f.read().strip())
+            return int(f.read().strip()) // 1000
 
     @staticmethod
     def get_by_label(hwmon: str, label: str) -> 'HWMonSensor':

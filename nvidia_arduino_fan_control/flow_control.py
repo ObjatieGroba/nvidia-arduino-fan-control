@@ -52,7 +52,7 @@ class FlowController:
 
         for controller in self.config.controllers:
             if controller.sensor not in self.sensors:
-                raise ValueError(f'Sensor {controller.fan} not found')
+                raise ValueError(f'Sensor {controller.sensor} not found')
             if controller.fan not in self.fans:
                 raise ValueError(f'Fan {controller.fan} not found')
 
