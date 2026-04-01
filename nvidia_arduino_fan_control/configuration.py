@@ -15,7 +15,7 @@ class SensorDescrBase(BaseModel):
 class HWMonSensorDescr(SensorDescrBase):
     type: tp.Literal['hwmon']
     hwmon: str
-    label: str | None
+    label: str | None = None
 
 
 class NvidiaSensorDescr(SensorDescrBase):
@@ -40,7 +40,7 @@ class FanDescrBase(BaseModel):
 class HWMonFanDescr(FanDescrBase):
     type: tp.Literal['hwmon']
     hwmon: str
-    label: str | None
+    label: str | None = None
 
 
 class ArduinoFanDescr(FanDescrBase):

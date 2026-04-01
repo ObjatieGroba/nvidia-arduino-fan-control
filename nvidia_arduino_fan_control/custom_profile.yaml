@@ -1,13 +1,13 @@
 sensors:
   - name: rtx5060ti
     type: nvidia
-    filter: 5060
+    filter: "5060"
   - name: rtx4090
     type: nvidia
-    filter: 4090
+    filter: "4090"
   - name: rtx4090wats
     type: nvidia
-    filter: 4090
+    filter: "4090"
     sensor: power
   - name: CPU
     type: hwmon
