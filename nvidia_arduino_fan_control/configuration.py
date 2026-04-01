@@ -86,4 +86,4 @@ class Configuration(BaseModel):
     fans: list[FanDescr]
     controllers: list[Controller]
     update_interval_seconds: float = 0.5
-    window_intervals: int = 4
+    window_intervals: int = 10

@@ -20,7 +20,7 @@ fans:
   - name: Pump Fan
     type: hwmon
     hwmon: hwmon4
-    min: 75
+    min: 80
   - name: GPU Front
     type: hwmon
     hwmon: hwmon4
@@ -29,7 +29,8 @@ fans:
     type: hwmon
     hwmon: hwmon4
     label: "System Fan #2"
-    min: 75
+    min: 40
+    max: 55
   - name: Front Down
     type: hwmon
     hwmon: hwmon4
@@ -47,11 +48,22 @@ controllers:
       - temp: 60
         flow: 100
   - sensor: rtx4090
+    fan: Front Down
+    points:
+      - temp: 59
+        flow: 0
+      - temp: 60
+        flow: 50
+      - temp: 70
+        flow: 100
+  - sensor: rtx4090
     fan: GPU Pump
     points:
       - temp: 40
-        flow: 75
+        flow: 40
       - temp: 50
+        flow: 40
+      - temp: 60
         flow: 100
   - sensor: rtx4090wats
     fan: GPU Front
@@ -74,8 +86,10 @@ controllers:
     points:
       - temp: 50
         flow: 0
+      - temp: 50
+        flow: 30
       - temp: 60
-        flow: 25
+        flow: 30
       - temp: 70
         flow: 50
       - temp: 80
@@ -84,6 +98,8 @@ controllers:
     fan: Pump Fan
     points:
       - temp: 50
+        flow: 75
+      - temp: 60
         flow: 75
       - temp: 70
         flow: 100
