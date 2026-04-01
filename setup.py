@@ -12,7 +12,7 @@ with open(os.path.join(_here, package_name, 'version.py')) as f:
 setup(
     name=package_name,
     version=version['__version__'],
-    description='PC Fan control depends on nvidia cards temp sensors',
+    description='PC Fan control depends on nvidia card sensors',
     long_description='',
     author='Igor Mineev',
     author_email='mineev@optain.ru',
@@ -20,6 +20,6 @@ setup(
     packages=[package_name],
     install_requires=[],
     package_data={
-        package_name: ['*.ino', '*.json']
+        package_name: ['*.ino', '*.yaml']
     },
     )

@@ -4,6 +4,7 @@ import serial
 import subprocess
 import glob
 from pathlib import Path
+from .pwm_controller import PWMController
 
 
 MAX_FLOW = 80
@@ -12,11 +13,11 @@ CHAR_VERSION = '!'
 MIN_REQ_FIRMWARE = [0, 1]
 RESTART_TIME_SECONDS = 3
 
-FIRMWARE_PATH = Path(__file__).absolute().parent / 'firmware.ino'
+FIRMWARE_PATH = Path(__name__).absolute().parent.parent / 'firmware.ino'
 
 
-class Nano:
-    def __init__(self, port: str | None = None, autoupdate: bool = False):
+class NanoController(PWMController):
+    def __init__(self, port: str | None = None, autoupdate: bool = False, min_speed: int | None = None, max_speed: int | None = None):
         if port is None:
             # Try to find it automatically
             possible = glob.glob('/dev/ttyUSB*')
@@ -30,6 +31,8 @@ class Nano:
         self.serial: serial.Serial | None = None
         self._init_serial()
         self._check_update_firmware_version(autoupdate)
+
+        super().__init__('arduino', min_speed, max_speed)
 
     def _check_update_firmware_version(self, autoupdate: bool = True, req: int = 3) -> None:
         print('Checking firmware version...', file=sys.stderr)
@@ -55,7 +58,8 @@ class Nano:
         self.serial = serial.Serial(port=self.port, baudrate=baudrate, timeout=timeout)
         time.sleep(RESTART_TIME_SECONDS)
 
-    def set_pwm(self, flow: int) -> bool:
+    def _set(self, fflow: float) -> bool:
+        flow = int(fflow * MAX_FLOW)
         if flow < 0 or flow > MAX_FLOW:
             raise ValueError(f'Signal must be between 0 and {MAX_FLOW}')
         if self.serial is None:
@@ -65,6 +69,9 @@ class Nano:
         self.serial.write(chr(ord(FLOW_CHAR_START) + flow).encode())
         err = self.serial.readline().strip()
         return err == b'0'
+
+    def _get(self) -> int | None:
+        return None
 
     def get_firmware_version(self) -> list[int]:
         if self.serial is None:

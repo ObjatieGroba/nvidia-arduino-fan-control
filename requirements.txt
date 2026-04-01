@@ -1,2 +1,6 @@
 pyserial
-dataclass_wizard
+pydantic
+setuptools
+nvidia-ml-py
+argparse
+pyyaml

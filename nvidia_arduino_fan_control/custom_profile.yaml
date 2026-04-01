@@ -1,0 +1,89 @@
+sensors:
+  - name: rtx5060ti
+    type: nvidia
+    filter: 5060
+  - name: rtx4090
+    type: nvidia
+    filter: 4090
+  - name: rtx4090wats
+    type: nvidia
+    filter: 4090
+    sensor: power
+  - name: CPU
+    type: hwmon
+    hwmon: hwmon4
+
+fans:
+  - name: CPU Fan
+    type: hwmon
+    hwmon: hwmon4
+  - name: Pump Fan
+    type: hwmon
+    hwmon: hwmon4
+    min: 75
+  - name: GPU Front
+    type: hwmon
+    hwmon: hwmon4
+    label: "System Fan #1"
+  - name: GPU Pump
+    type: hwmon
+    hwmon: hwmon4
+    label: "System Fan #2"
+    min: 75
+  - name: Front Down
+    type: hwmon
+    hwmon: hwmon4
+    label: "System Fan #3"
+
+
+controllers:
+  - sensor: rtx4090
+    fan: GPU Front
+    points:
+      - temp: 40
+        flow: 0
+      - temp: 50
+        flow: 50
+      - temp: 60
+        flow: 100
+  - sensor: rtx4090
+    fan: GPU Pump
+    points:
+      - temp: 40
+        flow: 75
+      - temp: 50
+        flow: 100
+  - sensor: rtx4090w
+    fan: GPU Front
+    points:
+      - temp: 100
+        flow: 0
+      - temp: 200
+        flow: 50
+  - sensor: rtx5060ti
+    fan: Front Down
+    points:
+      - temp: 50
+        flow: 0
+      - temp: 60
+        flow: 50
+      - temp: 70
+        flow: 100
+  - sensor: CPU
+    fan: CPU Fan
+    points:
+      - temp: 50
+        flow: 0
+      - temp: 60
+        flow: 25
+      - temp: 70
+        flow: 50
+      - temp: 80
+        flow: 100
+  - sensor: CPU
+    fan: Pump Fan
+    points:
+      - temp: 50
+        flow: 75
+      - temp: 70
+        flow: 100

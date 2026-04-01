@@ -1,0 +1,16 @@
+sensors:
+  - name: gpus
+    type: nvidia
+fans:
+  - name: arduino
+    type: arduino
+controllers:
+  sensor: gpus
+  fan: arduino
+  points:
+    - temp: 50
+      flow: 10
+    - temp: 60
+      flow: 50
+    - temp: 80
+      flow: 100

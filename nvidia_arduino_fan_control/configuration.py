@@ -1,69 +1,89 @@
-from .arduino_tools import MAX_FLOW
-from .nvidia_tools import GpuInfo
-
-import dataclasses
-import json
-from dataclass_wizard import JSONWizard
+from pydantic import BaseModel, Field
+import typing as tp
 
 
-ALLOWED_MODES = ('slope', 'stair')
-
-
-@dataclasses.dataclass
-class TempPoint(JSONWizard):
+class TempPoint(BaseModel):
     temp: int
     flow: int
 
 
-@dataclasses.dataclass
-class Configuration(JSONWizard):
-    temp_points: list[TempPoint]
-    gpu_active_threshold_flow: int
-    gpu_power_threshold_w: int
-    step_down_threshold_seconds: float
-    update_interval_seconds: float
-    mode: str
+class SensorDescrBase(BaseModel):
+    name: str
+    type: tp.Literal['hwmon', 'nvidia']
 
-    def __post_init__(self) -> None:
-        if self.mode not in ALLOWED_MODES:
-            raise ValueError(f'Unsupported mode: {self.mode}. Allowed modes are {ALLOWED_MODES}')
-        for i in range(len(self.temp_points) - 1):
-            if self.temp_points[i].temp >= self.temp_points[i + 1].temp:
-                raise ValueError(f'Expected ascending temp points: {self.temp_points[i].temp} < {self.temp_points[i + 1].temp}')
-            if self.temp_points[i].flow > self.temp_points[i + 1].flow:
-                raise ValueError(f'Expected ascending flow points: {self.temp_points[i].flow} <= {self.temp_points[i + 1].flow}')
-        for point in self.temp_points:
-            if point.flow > MAX_FLOW:
-                raise ValueError(f'Flow should not be greater than {MAX_FLOW} - {point.flow}')
-        if self.gpu_active_threshold_flow > MAX_FLOW:
-            raise ValueError(f'Flow should not be greater than {MAX_FLOW} - {self.gpu_active_threshold_flow}')
 
-    def get_flow(self, info: list[GpuInfo]) -> int:
-        max_temp = max(i.temp for i in info)
-        fan_active = any(i.fan_speed_perc for i in info)
-        power_consume_active = any(i.cur_power_w > self.gpu_power_threshold_w for i in info)
+class HWMonSensorDescr(SensorDescrBase):
+    type: tp.Literal['hwmon']
+    hwmon: str
+    label: str | None
 
-        next_point_idx = next((i for i in range(len(self.temp_points)) if self.temp_points[i].temp > max_temp), len(self.temp_points))
-        cur_point = self.temp_points[next_point_idx - 1] if next_point_idx > 0 else self.temp_points[0]
+
+class NvidiaSensorDescr(SensorDescrBase):
+    type: tp.Literal['nvidia']
+    sensor: tp.Literal['temp', 'power'] = 'temp'
+    filter: str | None = None
+    
+    
+SensorDescr = tp.Annotated[
+    tp.Union[HWMonSensorDescr, NvidiaSensorDescr],
+    Field(discriminator="type")
+]
+
+
+class FanDescrBase(BaseModel):
+    name: str
+    type: tp.Literal['hwmon', 'arduino']
+    min: int | None = None
+    max: int | None = None
+
+
+class HWMonFanDescr(FanDescrBase):
+    type: tp.Literal['hwmon']
+    hwmon: str
+    label: str | None
+
+
+class ArduinoFanDescr(FanDescrBase):
+    type: tp.Literal['arduino']
+    port: str | None = None
+    autoupdate: bool = False
+
+
+FanDescr = tp.Annotated[
+    tp.Union[HWMonFanDescr, ArduinoFanDescr],
+    Field(discriminator="type")
+]
+
+
+class Controller(BaseModel):
+    sensor: str
+    fan: str
+
+    points: list[TempPoint]
+    mode: tp.Literal['slope', 'stair'] = 'slope'
+
+    def get(self, value: int) -> float:
+        idx = 0
+        for point in self.points:
+            if point.temp > value:
+                break
+            idx += 1
+
+        cur = self.points[idx - 1] if idx > 0 else self.points[0]
+
         if self.mode == 'stair':
-            new_flow = cur_point.flow
-        elif self.mode == 'slope':
-            if cur_point.temp >= max_temp:
-                new_flow = cur_point.flow
-            elif next_point_idx < len(self.temp_points):
-                next_point = self.temp_points[next_point_idx]
-                new_flow = cur_point.flow + int((max_temp - cur_point.temp) * (next_point.flow - cur_point.flow) / (next_point.temp - cur_point.temp))
-            else:
-                new_flow = self.temp_points[-1].flow
-        else:
-            raise NotImplementedError()
+            return cur.flow / 100
 
-        if fan_active or power_consume_active:
-            new_flow = max(new_flow, self.gpu_active_threshold_flow)
+        nxt = self.points[idx] if idx < len(self.points) else self.points[-1]
 
-        return new_flow
+        if nxt.temp == cur.temp:
+            return nxt.flow / 100
+        return (cur.flow + (value - cur.temp) * (nxt.flow - cur.flow) / (nxt.temp - cur.temp)) / 100
 
-    @staticmethod
-    def load(path: str) -> 'Configuration':
-        with open(path, 'r') as f:
-            return Configuration.from_dict(json.load(f))
+
+class Configuration(BaseModel):
+    sensors: list[SensorDescr]
+    fans: list[FanDescr]
+    controllers: list[Controller]
+    update_interval_seconds: float = 0.5
+    window_intervals: int = 4
