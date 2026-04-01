@@ -40,6 +40,7 @@ fans:
 controllers:
   - sensor: rtx4090
     fan: GPU Front
+    mode: stair
     points:
       - temp: 40
         flow: 0
@@ -49,8 +50,9 @@ controllers:
         flow: 100
   - sensor: rtx4090
     fan: Front Down
+    mode: stair
     points:
-      - temp: 59
+      - temp: 60
         flow: 0
       - temp: 60
         flow: 50
@@ -58,6 +60,7 @@ controllers:
         flow: 100
   - sensor: rtx4090
     fan: GPU Pump
+    mode: stair
     points:
       - temp: 40
         flow: 40
@@ -67,6 +70,7 @@ controllers:
         flow: 100
   - sensor: rtx4090wats
     fan: GPU Front
+    mode: stair
     points:
       - temp: 100
         flow: 0
@@ -74,6 +78,7 @@ controllers:
         flow: 50
   - sensor: rtx5060ti
     fan: Front Down
+    mode: stair
     points:
       - temp: 50
         flow: 0
@@ -83,10 +88,11 @@ controllers:
         flow: 100
   - sensor: CPU
     fan: CPU Fan
+    mode: stair
     points:
-      - temp: 50
+      - temp: 55
         flow: 0
-      - temp: 50
+      - temp: 55
         flow: 30
       - temp: 60
         flow: 30
@@ -96,6 +102,7 @@ controllers:
         flow: 100
   - sensor: CPU
     fan: Pump Fan
+    mode: stair
     points:
       - temp: 50
         flow: 75

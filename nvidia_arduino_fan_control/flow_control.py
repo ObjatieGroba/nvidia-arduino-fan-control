@@ -12,6 +12,7 @@ from .configuration import Configuration, HWMonSensorDescr, NvidiaSensorDescr, H
 class SensorInfo:
     sensor: Sensor
     last_value: int = 0
+    last_printed_value: int = 0
 
 
 @dataclass
@@ -60,7 +61,9 @@ class FlowController:
         for name, sensor in self.sensors.items():
             try:
                 sensor.last_value = sensor.sensor.get(start_time)
-                print(f'Sensor {name}: {sensor.last_value}', file=sys.stderr)
+                if abs(sensor.last_value - sensor.last_printed_value) > 5:
+                    print(f'Sensor {name}: {sensor.last_value}', file=sys.stderr)
+                    sensor.last_printed_value = sensor.last_value
             except Exception as e:
                 print(f'Sensor {name} failed to read: {type(e)} - {e}', file=sys.stderr)
 
