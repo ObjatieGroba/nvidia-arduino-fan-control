@@ -13,6 +13,7 @@ sensors:
   - name: CPU
     type: hwmon
     hwmon: hwmon4
+    suppress: true
 
 fans:
   - name: CPU Fan
@@ -46,8 +47,10 @@ controllers:
       - temp: 40
         flow: 0
       - temp: 50
-        flow: 50
+        flow: 30
       - temp: 60
+        flow: 50
+      - temp: 70
         flow: 100
   - sensor: rtx4090
     fan: Front Down
@@ -76,7 +79,7 @@ controllers:
       - temp: 100
         flow: 0
       - temp: 200
-        flow: 50
+        flow: 30
   - sensor: rtx5060ti
     fan: Front Down
     mode: stair
@@ -91,10 +94,8 @@ controllers:
     fan: CPU Fan
     mode: stair
     points:
-      - temp: 55
+      - temp: 60
         flow: 0
-      - temp: 55
-        flow: 30
       - temp: 60
         flow: 30
       - temp: 70
